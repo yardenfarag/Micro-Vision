@@ -2,6 +2,8 @@
 
 **Microbe segmentation & 3D educational viewer**
 
+**Live demo:** [https://micro-vision-ten.vercel.app/](https://micro-vision-ten.vercel.app/)
+
 Upload a Gram-stained bacterial microscope image and get a segmentation overlay, morphology / arrangement / Gram-appearance estimates, a rotatable 3D reference model, and a short educational card — all in one place.
 
 > **Educational use only.** Micro Vision analyzes visible image features and shows a reference 3D model based on detected morphology. It does **not** provide species-level identification or medical diagnosis.
