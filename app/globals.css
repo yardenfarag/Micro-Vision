@@ -1,26 +1,168 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #060912;
+  --surface: #0c1322;
+  --surface-2: #111b2e;
+  --surface-3: #16223a;
+  --border: #1f2c44;
+  --border-strong: #2c3c5c;
+  --foreground: #e8eefc;
+  --muted: #9fb0cc;
+  --muted-2: #6d7f9e;
+
+  /* "Visible in image" = cyan, "Reference content" = violet */
+  --visible: #38e1d6;
+  --visible-soft: rgba(56, 225, 214, 0.12);
+  --reference: #a78bfa;
+  --reference-soft: rgba(167, 139, 250, 0.14);
+
+  --accent: #4cc2ff;
+  --accent-soft: rgba(76, 194, 255, 0.12);
+
+  --gram-pos: #8b7bff;
+  --gram-neg: #ff6fa5;
+  --gram-ind: #8aa0c0;
+
+  --ok: #38d39f;
+  --warn: #f5c453;
+  --danger: #ff6b6b;
+
+  --radius: 16px;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-visible: var(--visible);
+  --color-reference: var(--reference);
+  --color-accent: var(--accent);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas,
+    monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--border);
 }
 
+html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  min-height: 100%;
+  background-image:
+    radial-gradient(900px 600px at 12% -8%, rgba(76, 194, 255, 0.10), transparent 60%),
+    radial-gradient(800px 600px at 100% 0%, rgba(167, 139, 250, 0.10), transparent 55%),
+    radial-gradient(700px 700px at 50% 120%, rgba(56, 225, 214, 0.06), transparent 60%);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* Thin custom scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.card {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.card-hover {
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 12px 40px -20px rgba(76, 194, 255, 0.5);
+}
+
+.glow-ring {
+  box-shadow: 0 0 0 1px var(--border), 0 18px 60px -30px rgba(76, 194, 255, 0.6);
+}
+
+@keyframes mvspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.mv-spin {
+  animation: mvspin 0.9s linear infinite;
+}
+
+@keyframes mvpulse {
+  0%, 100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.mv-pulse {
+  animation: mvpulse 1.4s ease-in-out infinite;
+}
+
+@keyframes mvbar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+.mv-indeterminate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: mvbar 1.2s ease-in-out infinite;
+}
+
+@keyframes mvrise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.mv-rise {
+  animation: mvrise 0.4s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-spin,
+  .mv-pulse,
+  .mv-indeterminate::after,
+  .mv-rise {
+    animation: none;
+  }
 }
