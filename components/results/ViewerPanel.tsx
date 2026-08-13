@@ -29,15 +29,18 @@ export function ViewerPanel({ viewer }: { viewer: ResultViewer }) {
 
       <MicrobeViewer templateId={viewer.template_id} colorTheme={viewer.color_theme} />
 
-      <div className="mt-3 flex items-center justify-between gap-2">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <span className="rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2 py-1 text-[11px] text-[var(--muted)]">
           template: <span className="font-mono text-[var(--foreground)]">{viewer.template_id}</span>
+        </span>
+        <span className="text-[11px] text-[var(--muted-2)]">
+          Click regions to learn about structure
         </span>
       </div>
 
       <p className="mt-3 rounded-lg border border-[rgba(167,139,250,0.3)] bg-[var(--reference-soft)] p-3 text-[11.5px] leading-relaxed text-[var(--reference)]">
         Reference 3D model based on detected morphology, not an exact reconstruction
-        from the image.
+        from the image. Highlighted parts are teaching overlays, not measured features.
       </p>
     </div>
   );
