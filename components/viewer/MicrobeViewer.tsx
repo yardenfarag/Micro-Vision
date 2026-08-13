@@ -48,9 +48,9 @@ export function MicrobeViewer({
   };
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row">
+    <div className="flex w-full flex-col gap-3 lg:flex-row">
       <div
-        className="relative aspect-square w-full overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-3)] sm:flex-1"
+        className="relative aspect-[16/10] w-full min-h-[320px] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-3)] lg:min-h-[420px] lg:flex-1"
         style={{ backgroundImage: colors.backdrop }}
       >
         <Canvas
@@ -122,7 +122,7 @@ export function MicrobeViewer({
         </span>
       </div>
 
-      <div className="h-[280px] w-full overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-4 sm:h-auto sm:w-64 sm:flex-none sm:self-stretch">
+      <div className="h-[260px] w-full overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-4 lg:h-auto lg:w-72 lg:flex-none lg:self-stretch">
         <PartPanel parts={parts} selected={selected} onSelect={setSelected} />
       </div>
     </div>

@@ -115,14 +115,15 @@ export function ResultsView({ jobId }: { jobId: string }) {
       )}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
-        <div className="flex flex-col gap-4">
-          <ImagePanel src={imageSrc} segmentation={result.segmentation} />
-          <ViewerPanel viewer={result.viewer} />
-        </div>
+        <ImagePanel src={imageSrc} segmentation={result.segmentation} />
         <div className="flex flex-col gap-4">
           <SummaryPanel result={result} />
           <ConfidencePanel result={result} />
         </div>
+      </div>
+
+      <div className="mt-4 w-full">
+        <ViewerPanel viewer={result.viewer} />
       </div>
 
       <div className="mt-4">

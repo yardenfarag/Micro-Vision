@@ -10,7 +10,7 @@ const MicrobeViewer = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="grid aspect-square w-full place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface-3)]">
+      <div className="grid aspect-[16/10] min-h-[320px] w-full place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface-3)]">
         <div className="flex flex-col items-center gap-3 text-[12px] text-[var(--muted-2)]">
           <span className="mv-spin h-6 w-6 rounded-full border-2 border-[var(--accent)] border-t-transparent" />
           Loading 3D model…
