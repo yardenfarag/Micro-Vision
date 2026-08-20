@@ -16,8 +16,14 @@ export interface ImageMetrics {
   hueHistogram: number[];
   /** Fraction of colored pixels that read as purple/blue (Gram-positive-like) */
   purpleBlueFraction: number;
-  /** Fraction of colored pixels that read as pink/red (Gram-negative-like) */
+  /** Fraction of colored pixels that read as pink/red (Gram-negative-like / carbol fuchsin) */
   pinkRedFraction: number;
+  /** Fraction of colored pixels in malachite-green / spore-stain greens */
+  greenFraction: number;
+  /** Fraction of colored pixels in methylene-blue / cyan-blue (not violet) */
+  blueFraction: number;
+  /** 0 = isotropic foreground cloud; 1 = strongly elongated (filament bias) */
+  elongationScore: number;
   /** Fraction of pixels at/near white (overexposure proxy) */
   overexposedFraction: number;
   /** Fraction of pixels at/near black (underexposure proxy) */
@@ -82,7 +88,15 @@ export function computeImageMetrics(img: HTMLImageElement): ImageMetrics {
   let coloredCount = 0;
   let purpleBlue = 0;
   let pinkRed = 0;
+  let green = 0;
+  let blue = 0;
   let foreground = 0;
+  let fgCount = 0;
+  let sumX = 0;
+  let sumY = 0;
+  let sumXX = 0;
+  let sumYY = 0;
+  let sumXY = 0;
   const hueHistogram = new Array(12).fill(0);
   let signature = 2166136261; // FNV-ish seed
 
@@ -108,10 +122,23 @@ export function computeImageMetrics(img: HTMLImageElement): ImageMetrics {
       const bin = Math.min(11, Math.floor(h / 30));
       hueHistogram[bin] += 1;
 
+      const x = i % sw;
+      const y = Math.floor(i / sw);
+      fgCount++;
+      sumX += x;
+      sumY += y;
+      sumXX += x * x;
+      sumYY += y * y;
+      sumXY += x * y;
+
       // Gram-positive-like: crystal-violet purples/blues (~230-300deg)
       if (h >= 215 && h <= 305) purpleBlue++;
-      // Gram-negative-like: safranin pinks/reds (>=320 or <=15, plus magenta 290-320)
+      // Gram-negative-like / carbol fuchsin: safranin pinks/reds
       else if (h >= 305 || h <= 18 || (h >= 290 && h < 305)) pinkRed++;
+      // Malachite green / spore stain (independent of Gram bands)
+      if (h >= 70 && h < 165) green++;
+      // Methylene blue / cyan-blue counterstain (excludes violet)
+      if (h >= 165 && h < 230) blue++;
     } else if (v > 0.12 && v < 0.92) {
       // mid-tone, low-saturation tissue still counts a little as foreground
       foreground += 0.3;
@@ -160,6 +187,24 @@ export function computeImageMetrics(img: HTMLImageElement): ImageMetrics {
   }
   const lapVar = laplace.length > 0 ? lapVarSum / laplace.length : 0;
 
+  let elongationScore = 0;
+  if (fgCount > 24) {
+    const meanX = sumX / fgCount;
+    const meanY = sumY / fgCount;
+    const covXX = sumXX / fgCount - meanX * meanX;
+    const covYY = sumYY / fgCount - meanY * meanY;
+    const covXY = sumXY / fgCount - meanX * meanY;
+    const trace = covXX + covYY;
+    const det = covXX * covYY - covXY * covXY;
+    const disc = Math.max(0, trace * trace - 4 * det);
+    const root = Math.sqrt(disc);
+    const lambda1 = (trace + root) / 2;
+    const lambda2 = (trace - root) / 2;
+    const major = Math.max(Math.abs(lambda1), Math.abs(lambda2));
+    const minor = Math.min(Math.abs(lambda1), Math.abs(lambda2));
+    if (major > 1e-6) elongationScore = clamp01(1 - minor / major);
+  }
+
   return {
     width,
     height,
@@ -170,6 +215,9 @@ export function computeImageMetrics(img: HTMLImageElement): ImageMetrics {
     hueHistogram: normalize(hueHistogram),
     purpleBlueFraction: coloredCount > 0 ? purpleBlue / coloredCount : 0,
     pinkRedFraction: coloredCount > 0 ? pinkRed / coloredCount : 0,
+    greenFraction: coloredCount > 0 ? green / coloredCount : 0,
+    blueFraction: coloredCount > 0 ? blue / coloredCount : 0,
+    elongationScore,
     overexposedFraction: overexposed / n,
     underexposedFraction: underexposed / n,
     foregroundFraction: clamp01(foreground / n),

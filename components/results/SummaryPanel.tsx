@@ -1,13 +1,71 @@
 "use client";
 
 import {
+  ACID_FAST_DISPLAY,
   ARRANGEMENT_DISPLAY,
+  CAPSULE_PRESENCE_DISPLAY,
   GRAM_DISPLAY,
+  IMAGE_TYPE_DISPLAY,
   MORPHOLOGY_DISPLAY,
   QUALITY_DISPLAY,
+  SPORE_POSITION_DISPLAY,
+  SPORE_PRESENCE_DISPLAY,
   type AnalysisResult,
+  type ResultClassification,
 } from "@/lib/taxonomy";
 import { Pill, SectionTitle } from "@/components/ui";
+
+function arrangementTile(c: ResultClassification): {
+  label: string;
+  value: string;
+  confidence: number;
+} {
+  if (c.stain === "spore") {
+    return {
+      label: "Spore position",
+      value: SPORE_POSITION_DISPLAY[c.spore_position.label],
+      confidence: c.spore_position.confidence,
+    };
+  }
+  return {
+    label: "Arrangement",
+    value: ARRANGEMENT_DISPLAY[c.arrangement.label],
+    confidence: c.arrangement.confidence,
+  };
+}
+
+function appearanceTile(c: ResultClassification): {
+  label: string;
+  value: string;
+  confidence: number;
+} {
+  switch (c.stain) {
+    case "gram":
+      return {
+        label: "Gram appearance",
+        value: GRAM_DISPLAY[c.gram_appearance.label],
+        confidence: c.gram_appearance.confidence,
+      };
+    case "acid_fast":
+      return {
+        label: "Acid-fast appearance",
+        value: ACID_FAST_DISPLAY[c.acid_fast_appearance.label],
+        confidence: c.acid_fast_appearance.confidence,
+      };
+    case "spore":
+      return {
+        label: "Endospore",
+        value: SPORE_PRESENCE_DISPLAY[c.spore_presence.label],
+        confidence: c.spore_presence.confidence,
+      };
+    case "capsule":
+      return {
+        label: "Capsule",
+        value: CAPSULE_PRESENCE_DISPLAY[c.capsule_presence.label],
+        confidence: c.capsule_presence.confidence,
+      };
+  }
+}
 
 export function SummaryPanel({ result }: { result: AnalysisResult }) {
   const { classification, input } = result;
@@ -17,6 +75,9 @@ export function SummaryPanel({ result }: { result: AnalysisResult }) {
       : input.quality === "usable_with_warning"
         ? "warn"
         : "danger";
+  const mid = arrangementTile(classification);
+  const appearance = appearanceTile(classification);
+  const stainName = IMAGE_TYPE_DISPLAY[input.image_type];
 
   return (
     <div className="card card-hover p-4">
@@ -31,23 +92,24 @@ export function SummaryPanel({ result }: { result: AnalysisResult }) {
           confidence={classification.morphology.confidence}
         />
         <SummaryTile
-          label="Arrangement"
-          value={ARRANGEMENT_DISPLAY[classification.arrangement.label]}
-          confidence={classification.arrangement.confidence}
+          label={mid.label}
+          value={mid.value}
+          confidence={mid.confidence}
         />
         <SummaryTile
-          label="Gram appearance"
-          value={GRAM_DISPLAY[classification.gram_appearance.label]}
-          confidence={classification.gram_appearance.confidence}
+          label={appearance.label}
+          value={appearance.value}
+          confidence={appearance.confidence}
           small
         />
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Pill tone="neutral">{stainName}</Pill>
         <Pill tone={result._source === "model" ? "ok" : "neutral"}>
           {result._source === "model"
             ? "Morphology & Gram: trained model"
-            : "Morphology & Gram: heuristic estimate"}
+            : "Labels: heuristic estimate"}
         </Pill>
         <Pill tone={qualityTone}>
           <span className="opacity-70">Quality:</span> {QUALITY_DISPLAY[input.quality]}

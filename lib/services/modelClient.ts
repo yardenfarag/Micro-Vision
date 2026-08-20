@@ -1,6 +1,6 @@
 // Client for the optional Python inference backend.
-// When the backend is reachable, morphology + Gram come from the trained model.
-// Otherwise the caller falls back to the heuristic pipeline.
+// When the backend is reachable, morphology + Gram come from the trained model
+// (Gram stains only). Otherwise the caller falls back to the heuristic pipeline.
 
 import type { GramLabel, MorphologyLabel } from "@/lib/taxonomy";
 

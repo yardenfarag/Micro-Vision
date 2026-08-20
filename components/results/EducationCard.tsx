@@ -20,12 +20,20 @@ export function EducationCard({ education }: { education: ResultEducation }) {
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <InfoBlock title="Morphology" body={education.morphology_explanation} />
         <InfoBlock title="Arrangement" body={education.arrangement_explanation} />
-        <InfoBlock title="Gram stain" body={education.gram_explanation} />
+        <InfoBlock title={education.appearance_title} body={education.appearance_explanation} />
         <InfoBlock title="Habitat / notes" body={education.habitat_notes} />
+        {education.structure_explanation ? (
+          <InfoBlock title="Special structure" body={education.structure_explanation} />
+        ) : null}
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <ListBlock title="Common examples" items={education.common_examples} />
+        {education.class_features.length > 0 ? (
+          <ListBlock title="Class features" items={education.class_features} />
+        ) : null}
+        {education.common_examples.length > 0 ? (
+          <ListBlock title="Common examples" items={education.common_examples} />
+        ) : null}
         <ListBlock title="Common follow-up tests" items={education.common_tests} />
       </div>
 

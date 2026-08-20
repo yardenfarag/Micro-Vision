@@ -1,16 +1,16 @@
 import {
   type ArrangementLabel,
   type ColorTheme,
-  type GramLabel,
   type MorphologyLabel,
+  type ResultClassification,
   type TemplateId,
 } from "@/lib/taxonomy";
 
-// Map morphology + arrangement to a 3D template id (spec section 17).
-export function selectTemplate(
+function gramTemplate(
   morphology: MorphologyLabel,
   arrangement: ArrangementLabel
 ): TemplateId {
+  if (morphology === "filamentous") return "filamentous_branching";
   if (morphology === "mixed") return "mixed_bacteria_scene";
   if (morphology === "unknown") return "generic_bacteria";
   if (morphology === "vibrio") return "vibrio_single";
@@ -31,7 +31,6 @@ export function selectTemplate(
     }
   }
 
-  // bacilli
   switch (arrangement) {
     case "cluster":
       return "bacillus_cluster";
@@ -41,14 +40,49 @@ export function selectTemplate(
   }
 }
 
-// Map Gram appearance to a color theme (spec section 17).
-export function selectColorTheme(gram: GramLabel): ColorTheme {
-  switch (gram) {
-    case "gram_positive_like":
-      return "purple_blue";
-    case "gram_negative_like":
-      return "pink_red";
-    default:
-      return "neutral_gray";
+export function selectTemplate(classification: ResultClassification): TemplateId {
+  const morph = classification.morphology.label;
+
+  switch (classification.stain) {
+    case "acid_fast":
+      if (morph === "filamentous") return "filamentous_branching";
+      return "acid_fast_bacillus";
+    case "spore": {
+      if (classification.spore_presence.label !== "present") {
+        return morph === "filamentous" ? "filamentous_branching" : "bacillus_single";
+      }
+      return classification.spore_position.label === "terminal"
+        ? "bacillus_endospore_terminal"
+        : "bacillus_endospore_central";
+    }
+    case "capsule":
+      if (classification.capsule_presence.label !== "present") {
+        return gramTemplate(morph, classification.arrangement.label);
+      }
+      return morph === "cocci" ? "encapsulated_coccus" : "encapsulated_bacillus";
+    case "gram":
+      return gramTemplate(morph, classification.arrangement.label);
+  }
+}
+
+export function selectColorTheme(classification: ResultClassification): ColorTheme {
+  switch (classification.stain) {
+    case "acid_fast":
+      return classification.acid_fast_appearance.label === "acid_fast_negative_like"
+        ? "neutral_gray"
+        : "acid_fast_red";
+    case "spore":
+      return "spore_green";
+    case "capsule":
+      return "capsule_halo";
+    case "gram":
+      switch (classification.gram_appearance.label) {
+        case "gram_positive_like":
+          return "purple_blue";
+        case "gram_negative_like":
+          return "pink_red";
+        default:
+          return "neutral_gray";
+      }
   }
 }

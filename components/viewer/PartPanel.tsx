@@ -44,8 +44,7 @@ export function PartPanel({
           <div className="flex h-full flex-col items-center justify-center px-2 text-center">
             <p className="text-[13px] text-[var(--muted)]">Click a region to learn more</p>
             <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted-2)]">
-              Click the glowing envelope or arrangement ring on the model, or pick a part
-              above.
+              Click a glowing region on the model, or pick a part above.
             </p>
           </div>
         ) : (

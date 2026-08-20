@@ -78,6 +78,43 @@ function ArrangementMaterial({ selected }: { selected: boolean }) {
   );
 }
 
+function SporeMaterial({ selected }: { selected: boolean }) {
+  return (
+    <meshStandardMaterial
+      color={selected ? SELECTED_COLOR : "#6fc98c"}
+      emissive={selected ? SELECTED_EMISSIVE : "#1d6b3a"}
+      emissiveIntensity={selected ? 0.55 : 0.4}
+      roughness={0.28}
+      metalness={0.12}
+    />
+  );
+}
+
+function CapsuleHaloMaterial({ selected }: { selected: boolean }) {
+  return (
+    <meshStandardMaterial
+      color={selected ? SELECTED_COLOR : "#e9d5ff"}
+      transparent
+      opacity={selected ? 0.38 : 0.16}
+      roughness={0.7}
+      metalness={0.02}
+      depthWrite={false}
+    />
+  );
+}
+
+function BranchMaterial({ selected }: { selected: boolean }) {
+  return (
+    <meshStandardMaterial
+      color={selected ? SELECTED_COLOR : "#f0abfc"}
+      emissive={selected ? SELECTED_EMISSIVE : "#86198f"}
+      emissiveIntensity={selected ? 0.5 : 0.28}
+      roughness={0.38}
+      metalness={0.08}
+    />
+  );
+}
+
 function Coccus({
   position,
   colors,
@@ -344,6 +381,50 @@ export function TemplateMeshes({
     case "spirillum_single":
       return <SpirillumMesh colors={colors} selected={selected} onSelect={onSelect} />;
 
+    case "acid_fast_bacillus":
+      return (
+        <AcidFastRod
+          colors={colors}
+          selected={selected}
+          onSelect={onSelect}
+        />
+      );
+
+    case "filamentous_branching":
+      return (
+        <FilamentousMesh colors={colors} selected={selected} onSelect={onSelect} />
+      );
+
+    case "bacillus_endospore_central":
+      return (
+        <EndosporeRod
+          colors={colors}
+          selected={selected}
+          onSelect={onSelect}
+          position="central"
+        />
+      );
+
+    case "bacillus_endospore_terminal":
+      return (
+        <EndosporeRod
+          colors={colors}
+          selected={selected}
+          onSelect={onSelect}
+          position="terminal"
+        />
+      );
+
+    case "encapsulated_coccus":
+      return (
+        <EncapsulatedCoccus colors={colors} selected={selected} onSelect={onSelect} />
+      );
+
+    case "encapsulated_bacillus":
+      return (
+        <EncapsulatedRod colors={colors} selected={selected} onSelect={onSelect} />
+      );
+
     case "mixed_bacteria_scene":
       return (
         <group>
@@ -408,6 +489,284 @@ export function TemplateMeshes({
         </group>
       );
   }
+}
+
+function AcidFastRod({
+  colors,
+  selected,
+  onSelect,
+}: {
+  colors: ViewerColors;
+  selected: ViewerPartId | null;
+  onSelect: SelectHandler;
+}) {
+  const h = useSelectHandlers(onSelect);
+  const length = 1.85;
+  return (
+    <group rotation={[0, 0, Math.PI / 2]}>
+      <mesh
+        castShadow
+        onClick={(e) => h.onClick(e, "cell_body")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <capsuleGeometry args={[0.28, length, 16, 32]} />
+        <CellMaterial colors={colors} selected={selected === "cell_body"} />
+      </mesh>
+      {/* Slight beading along the rod — teaching cue, not a measured septum. */}
+      {[-0.45, 0.45].map((y) => (
+        <mesh key={y} position={[0, y, 0]} castShadow>
+          <sphereGeometry args={[0.3, 24, 24]} />
+          <CellMaterial colors={colors} selected={selected === "cell_body"} />
+        </mesh>
+      ))}
+      <mesh
+        renderOrder={2}
+        onClick={(e) => h.onClick(e, "cell_envelope")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <capsuleGeometry args={[0.48, length + 0.12, 12, 24]} />
+        <EnvelopeMaterial selected={selected === "cell_envelope"} />
+      </mesh>
+    </group>
+  );
+}
+
+function FilamentousMesh({
+  colors,
+  selected,
+  onSelect,
+}: {
+  colors: ViewerColors;
+  selected: ViewerPartId | null;
+  onSelect: SelectHandler;
+}) {
+  const h = useSelectHandlers(onSelect);
+  const main = useMemo(() => {
+    const pts: THREE.Vector3[] = [];
+    for (let i = 0; i <= 24; i++) {
+      const t = i / 24;
+      pts.push(
+        new THREE.Vector3(
+          t * 3.6 - 1.8,
+          Math.sin(t * Math.PI * 1.4) * 0.18,
+          Math.cos(t * Math.PI * 0.8) * 0.12
+        )
+      );
+    }
+    return pts;
+  }, []);
+  const branchA = useMemo(() => {
+    const pts: THREE.Vector3[] = [];
+    for (let i = 0; i <= 14; i++) {
+      const t = i / 14;
+      pts.push(new THREE.Vector3(0.15 + t * 1.35, 0.05 + t * 1.05, t * 0.15));
+    }
+    return pts;
+  }, []);
+  const branchB = useMemo(() => {
+    const pts: THREE.Vector3[] = [];
+    for (let i = 0; i <= 12; i++) {
+      const t = i / 12;
+      pts.push(new THREE.Vector3(-0.35 - t * 0.9, -0.08 - t * 0.85, -t * 0.12));
+    }
+    return pts;
+  }, []);
+
+  const mainBody = useMemo(() => {
+    const curve = new THREE.CatmullRomCurve3(main, false, "catmullrom", 0.5);
+    return new THREE.TubeGeometry(curve, 64, 0.16, 16, false);
+  }, [main]);
+  const mainEnv = useMemo(() => {
+    const curve = new THREE.CatmullRomCurve3(main, false, "catmullrom", 0.5);
+    return new THREE.TubeGeometry(curve, 64, 0.22, 14, false);
+  }, [main]);
+  const branchAGeom = useMemo(() => {
+    const curve = new THREE.CatmullRomCurve3(branchA, false, "catmullrom", 0.5);
+    return new THREE.TubeGeometry(curve, 40, 0.12, 14, false);
+  }, [branchA]);
+  const branchBGeom = useMemo(() => {
+    const curve = new THREE.CatmullRomCurve3(branchB, false, "catmullrom", 0.5);
+    return new THREE.TubeGeometry(curve, 36, 0.11, 14, false);
+  }, [branchB]);
+
+  return (
+    <group>
+      <mesh
+        geometry={mainBody}
+        castShadow
+        onClick={(e) => h.onClick(e, "cell_body")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <CellMaterial colors={colors} selected={selected === "cell_body"} />
+      </mesh>
+      <mesh
+        geometry={mainEnv}
+        renderOrder={2}
+        onClick={(e) => h.onClick(e, "cell_envelope")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <EnvelopeMaterial selected={selected === "cell_envelope"} />
+      </mesh>
+      <mesh
+        geometry={branchAGeom}
+        castShadow
+        onClick={(e) => h.onClick(e, "filament_branch")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <BranchMaterial selected={selected === "filament_branch"} />
+      </mesh>
+      <mesh
+        geometry={branchBGeom}
+        castShadow
+        onClick={(e) => h.onClick(e, "filament_branch")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <BranchMaterial selected={selected === "filament_branch"} />
+      </mesh>
+    </group>
+  );
+}
+
+function EndosporeRod({
+  colors,
+  selected,
+  onSelect,
+  position,
+}: {
+  colors: ViewerColors;
+  selected: ViewerPartId | null;
+  onSelect: SelectHandler;
+  position: "central" | "terminal";
+}) {
+  const h = useSelectHandlers(onSelect);
+  const length = 1.55;
+  const sporeY = position === "terminal" ? length * 0.42 : 0;
+  return (
+    <group rotation={[0, 0, Math.PI / 2]}>
+      <mesh
+        castShadow
+        onClick={(e) => h.onClick(e, "cell_body")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <capsuleGeometry args={[0.3, length, 16, 32]} />
+        <CellMaterial colors={colors} selected={selected === "cell_body"} />
+      </mesh>
+      <mesh
+        renderOrder={2}
+        onClick={(e) => h.onClick(e, "cell_envelope")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <capsuleGeometry args={[0.4, length + 0.08, 12, 24]} />
+        <EnvelopeMaterial selected={selected === "cell_envelope"} />
+      </mesh>
+      <mesh
+        position={[0, sporeY, 0]}
+        scale={[0.72, 1, 0.72]}
+        castShadow
+        onClick={(e) => h.onClick(e, "endospore")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <sphereGeometry args={[0.28, 28, 28]} />
+        <SporeMaterial selected={selected === "endospore"} />
+      </mesh>
+    </group>
+  );
+}
+
+function EncapsulatedCoccus({
+  colors,
+  selected,
+  onSelect,
+}: {
+  colors: ViewerColors;
+  selected: ViewerPartId | null;
+  onSelect: SelectHandler;
+}) {
+  const h = useSelectHandlers(onSelect);
+  return (
+    <group>
+      <mesh
+        castShadow
+        onClick={(e) => h.onClick(e, "cell_body")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <sphereGeometry args={[0.5, 48, 48]} />
+        <CellMaterial colors={colors} selected={selected === "cell_body"} />
+      </mesh>
+      <mesh
+        renderOrder={2}
+        onClick={(e) => h.onClick(e, "cell_envelope")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <sphereGeometry args={[0.62, 32, 32]} />
+        <EnvelopeMaterial selected={selected === "cell_envelope"} />
+      </mesh>
+      <mesh
+        renderOrder={3}
+        onClick={(e) => h.onClick(e, "capsule")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <sphereGeometry args={[0.95, 32, 32]} />
+        <CapsuleHaloMaterial selected={selected === "capsule"} />
+      </mesh>
+    </group>
+  );
+}
+
+function EncapsulatedRod({
+  colors,
+  selected,
+  onSelect,
+}: {
+  colors: ViewerColors;
+  selected: ViewerPartId | null;
+  onSelect: SelectHandler;
+}) {
+  const h = useSelectHandlers(onSelect);
+  const length = 1.4;
+  return (
+    <group rotation={[0, 0, Math.PI / 2]}>
+      <mesh
+        castShadow
+        onClick={(e) => h.onClick(e, "cell_body")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <capsuleGeometry args={[0.32, length, 16, 32]} />
+        <CellMaterial colors={colors} selected={selected === "cell_body"} />
+      </mesh>
+      <mesh
+        renderOrder={2}
+        onClick={(e) => h.onClick(e, "cell_envelope")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <capsuleGeometry args={[0.42, length + 0.08, 12, 24]} />
+        <EnvelopeMaterial selected={selected === "cell_envelope"} />
+      </mesh>
+      <mesh
+        renderOrder={3}
+        onClick={(e) => h.onClick(e, "capsule")}
+        onPointerOver={h.onPointerOver}
+        onPointerOut={h.onPointerOut}
+      >
+        <capsuleGeometry args={[0.72, length + 0.35, 12, 24]} />
+        <CapsuleHaloMaterial selected={selected === "capsule"} />
+      </mesh>
+    </group>
+  );
 }
 
 function VibrioMesh({

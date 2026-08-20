@@ -85,7 +85,7 @@ export function UploadZone({
         {dragging ? "Drop your image here" : "Drag & drop or click to upload"}
       </div>
       <div className="mt-1 text-[12.5px] text-[var(--muted)]">
-        Upload a Gram-stained bacterial microscope image
+        Upload a stained bacterial microscope image
       </div>
       <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-[11px] text-[var(--muted-2)]">
         <span className="rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2 py-0.5">

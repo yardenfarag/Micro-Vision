@@ -5,6 +5,9 @@ export const VIEWER_PART_IDS = [
   "cell_body",
   "cell_envelope",
   "arrangement",
+  "endospore",
+  "capsule",
+  "filament_branch",
 ] as const;
 export type ViewerPartId = (typeof VIEWER_PART_IDS)[number];
 
@@ -41,11 +44,35 @@ function envelopeCopy(theme: ColorTheme): Pick<ViewerPart, "description" | "note
         "This translucent shell is a teaching overlay — not a measured membrane from your image.",
     };
   }
+  if (theme === "acid_fast_red") {
+    return {
+      description:
+        "An acid-fast-positive-like envelope is lipid-rich (mycolic acids). That waxy wall retains carbol fuchsin after acid-alcohol, so cells look red/magenta.",
+      notes:
+        "The extra-thick shell is a teaching cue for a waxy wall — not a measured mycolic-acid layer.",
+    };
+  }
+  if (theme === "spore_green") {
+    return {
+      description:
+        "The vegetative-cell envelope here is the pink-staining outer body. The endospore inside has its own, much tougher coat.",
+      notes:
+        "Safranin colors the vegetative cell; malachite green is trapped in the spore.",
+    };
+  }
+  if (theme === "capsule_halo") {
+    return {
+      description:
+        "Under the capsule halo is the cell envelope (wall, and sometimes an outer membrane). The halo itself is a separate extracellular layer.",
+      notes:
+        "Click the outer halo to read about the capsule; this shell is the cell boundary.",
+    };
+  }
   return {
     description:
-      "Bacterial envelopes include a cell wall (and sometimes an outer membrane or capsule). Gram appearance was indeterminate on this image, so the shell is shown in a neutral theme.",
+      "Bacterial envelopes include a cell wall (and sometimes an outer membrane or capsule). Appearance was indeterminate on this image, so the shell is shown in a neutral theme.",
     notes:
-      "Re-staining a thinner smear often clarifies Gram appearance.",
+      "Re-staining a thinner smear often clarifies stain appearance.",
   };
 }
 
@@ -55,6 +82,7 @@ function bodyCopy(templateId: TemplateId): Pick<ViewerPart, "description" | "not
     case "cocci_pair":
     case "cocci_chain":
     case "cocci_cluster":
+    case "encapsulated_coccus":
       return {
         description:
           "The cell body here is coccus-shaped — roughly spherical. Shape classifies morphology only; it does not identify a species.",
@@ -63,11 +91,15 @@ function bodyCopy(templateId: TemplateId): Pick<ViewerPart, "description" | "not
       };
     case "bacillus_single":
     case "bacillus_cluster":
+    case "acid_fast_bacillus":
+    case "bacillus_endospore_central":
+    case "bacillus_endospore_terminal":
+    case "encapsulated_bacillus":
       return {
         description:
           "The cell body here is bacillus-shaped — a straight rod with rounded ends. Rod length and width vary widely across bacterial groups.",
         notes:
-          "Shape alone never determines species; many unrelated rods look similar in a Gram field.",
+          "Shape alone never determines species; many unrelated rods look similar on a stained field.",
       };
     case "vibrio_single":
       return {
@@ -83,6 +115,13 @@ function bodyCopy(templateId: TemplateId): Pick<ViewerPart, "description" | "not
         notes:
           "Helical bacteria can look like wavy rods if the focus plane clips only part of the coil.",
       };
+    case "filamentous_branching":
+      return {
+        description:
+          "The cell body here is a long filament. Filamentous bacteria grow as threads rather than short rods or spheres.",
+        notes:
+          "Filaments can fragment into shorter rods in a smear — that still does not identify a species.",
+      };
     case "mixed_bacteria_scene":
       return {
         description:
@@ -96,7 +135,7 @@ function bodyCopy(templateId: TemplateId): Pick<ViewerPart, "description" | "not
         description:
           "This is a generic bacterial reference body used when morphology was unclear. Treat it as a placeholder, not a classification.",
         notes:
-          "A clearer, well-focused Gram field usually yields a more specific shape template.",
+          "A clearer, well-focused stained field usually yields a more specific shape template.",
       };
   }
 }
@@ -145,7 +184,7 @@ function arrangementCopy(templateId: TemplateId): Pick<ViewerPart, "description"
 }
 
 /**
- * Educational parts available for a given 3D template + Gram color theme.
+ * Educational parts available for a given 3D template + color theme.
  * Geometry IDs in the viewer must match these part ids.
  */
 export function getViewerParts(
@@ -163,11 +202,52 @@ export function getViewerParts(
     },
     {
       id: "cell_envelope",
-      label: colorTheme === "pink_red" ? "Outer envelope" : "Cell wall / envelope",
+      label:
+        colorTheme === "acid_fast_red"
+          ? "Waxy envelope"
+          : colorTheme === "pink_red"
+            ? "Outer envelope"
+            : "Cell wall / envelope",
       description: envelope.description,
       notes: envelope.notes,
     },
   ];
+
+  if (templateId === "filamentous_branching") {
+    parts.push({
+      id: "filament_branch",
+      label: "Branching",
+      description:
+        "A branch is a side filament growing from the main thread. Branching is a morphology class used in teaching — it is not a species identification.",
+      notes:
+        "True branches stay attached; overlapping separate filaments can mimic branching on a 2D smear.",
+    });
+  }
+
+  if (
+    templateId === "bacillus_endospore_central" ||
+    templateId === "bacillus_endospore_terminal"
+  ) {
+    parts.push({
+      id: "endospore",
+      label: templateId === "bacillus_endospore_terminal" ? "Terminal endospore" : "Central endospore",
+      description:
+        "An endospore is a highly resistant, dormant oval inside the vegetative cell. On a spore stain it often looks green against a pink rod. Position (central vs terminal) is a teaching class, not an ID.",
+      notes:
+        "The oval here is a reference inclusion — not a measured spore from your photo.",
+    });
+  }
+
+  if (templateId === "encapsulated_coccus" || templateId === "encapsulated_bacillus") {
+    parts.push({
+      id: "capsule",
+      label: "Capsule halo",
+      description:
+        "A capsule is an extracellular layer that excludes stain, so it appears as a clear halo around the cell. Presence of a halo is a class feature, not a species call.",
+      notes:
+        "Debris, shrinkage, and thick smears can fake a halo. This overlay is a teaching shape.",
+    });
+  }
 
   if (MULTI_CELL_TEMPLATES.includes(templateId)) {
     const arr = arrangementCopy(templateId);

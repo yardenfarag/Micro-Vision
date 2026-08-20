@@ -6,7 +6,7 @@ import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 export const metadata: Metadata = {
   title: "Micro Vision — Microbe Segmentation & 3D Educational Viewer",
   description:
-    "Upload a Gram-stained bacterial microscope image to explore segmentation, morphology, arrangement, Gram appearance, and a rotatable 3D reference model. Educational use only.",
+    "Upload a stained bacterial microscope image (Gram, acid-fast, endospore, or capsule) to explore segmentation, morphology, stain appearance, and a rotatable 3D reference model. Educational use only.",
 };
 
 export default function RootLayout({

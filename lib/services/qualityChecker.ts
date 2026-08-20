@@ -40,9 +40,19 @@ export function checkQuality(m: ImageMetrics): QualityResult {
     score -= 0.1;
   }
 
+  // Dark-field / India-ink capsule stains are supposed to look dark; treat
+  // them as a background warning instead of a hard exposure failure.
+  const darkField =
+    m.contrast > 0.12 && m.foregroundFraction > 0.04 && m.brightness < 0.42;
+
   if (m.brightness < 0.12 || m.underexposedFraction > 0.55) {
-    warnings.push("underexposed");
-    score -= 0.3;
+    if (darkField) {
+      warnings.push("dark_field_background");
+      score -= 0.1;
+    } else {
+      warnings.push("underexposed");
+      score -= 0.3;
+    }
   } else if (m.underexposedFraction > 0.3) {
     warnings.push("slightly_underexposed");
     score -= 0.1;

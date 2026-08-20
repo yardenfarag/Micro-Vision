@@ -9,7 +9,6 @@ export interface ViewerColors {
   label: string;
 }
 
-// Gram-appearance-driven color themes (spec section 17).
 export const VIEWER_THEMES: Record<ColorTheme, ViewerColors> = {
   purple_blue: {
     cell: "#8b7bff",
@@ -34,5 +33,29 @@ export const VIEWER_THEMES: Record<ColorTheme, ViewerColors> = {
     backdrop:
       "radial-gradient(120% 120% at 50% 0%, rgba(159,176,204,0.18), rgba(8,10,22,0.0) 60%)",
     label: "Indeterminate (neutral) theme",
+  },
+  acid_fast_red: {
+    cell: "#e23d4a",
+    emissive: "#8b1520",
+    rim: "#ff8a94",
+    backdrop:
+      "radial-gradient(120% 120% at 50% 0%, rgba(226,61,74,0.22), rgba(8,10,22,0.0) 60%)",
+    label: "Acid-fast-positive-like theme",
+  },
+  spore_green: {
+    cell: "#e07a9a",
+    emissive: "#8a3048",
+    rim: "#8fd9a8",
+    backdrop:
+      "radial-gradient(120% 120% at 50% 0%, rgba(111,201,140,0.2), rgba(8,10,22,0.0) 60%)",
+    label: "Endospore stain theme",
+  },
+  capsule_halo: {
+    cell: "#c4b5fd",
+    emissive: "#5b4aa8",
+    rim: "#e9d5ff",
+    backdrop:
+      "radial-gradient(120% 120% at 50% 0%, rgba(196,181,253,0.18), rgba(8,10,22,0.0) 60%)",
+    label: "Capsule stain theme",
   },
 };

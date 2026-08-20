@@ -18,15 +18,15 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[var(--muted)]">
-            Upload a Gram-stained bacterial microscope image to get a segmentation
-            overlay, morphology &amp; arrangement labels, a Gram-appearance estimate,
+            Upload a stained bacterial microscope image to get a segmentation
+            overlay, morphology labels, a stain-appearance estimate,
             and a rotatable 3D reference model with a short educational card.
           </p>
 
           <ul className="mt-6 space-y-2.5">
             {[
               "Segmentation overlay of visible bacteria",
-              "Shape, arrangement & Gram-appearance estimates",
+              "Shape, arrangement & stain-appearance estimates",
               "Rotatable 3D reference model",
               "Curated, species-free educational info",
             ].map((t) => (
@@ -44,7 +44,8 @@ export default function HomePage() {
             <div className="flex items-center gap-4">
               <MicroscopyExample className="h-20 w-28 shrink-0 rounded-lg border border-[var(--border)]" />
               <p className="text-[12px] leading-relaxed text-[var(--muted)]">
-                A stained light-microscopy field showing bacterial cells. Drawings,
+                A stained light-microscopy field showing bacterial cells (Gram,
+                acid-fast, endospore, or capsule stains). Drawings,
                 EM/fluorescence images, fungi, parasites, and regular photos are not
                 supported.
               </p>

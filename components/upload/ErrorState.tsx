@@ -57,9 +57,9 @@ export function ErrorState({
 
         {kind === "unsupported" && (
           <p className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-[12px] text-[var(--muted-2)]">
-            Supported: Gram-stained bacterial light-microscopy images. Not
-            supported: drawings, EM/fluorescence images, fungi/parasites/viruses,
-            or regular photos.
+            Supported: bacterial light-microscopy stains (Gram, acid-fast,
+            endospore, or capsule). Not supported: drawings, EM/fluorescence
+            images, fungi/parasites/viruses, or regular photos.
           </p>
         )}
 

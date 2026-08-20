@@ -4,6 +4,7 @@ import type { AnalyzeResponse } from "@/lib/taxonomy";
 import { runPipeline } from "@/lib/services/formatter";
 import { newJobId, saveJob } from "@/lib/services/jobStore";
 import { isModelReachable, predictWithModel } from "@/lib/services/modelClient";
+import { classifySupport } from "@/lib/services/supportClassifier";
 
 interface AnalyzeBody {
   fileName?: string;
@@ -23,6 +24,9 @@ function isValidMetrics(m: Partial<ImageMetrics> | undefined): m is ImageMetrics
     "saturation",
     "purpleBlueFraction",
     "pinkRedFraction",
+    "greenFraction",
+    "blueFraction",
+    "elongationScore",
     "overexposedFraction",
     "underexposedFraction",
     "foregroundFraction",
@@ -54,10 +58,15 @@ export async function POST(req: Request): Promise<NextResponse<AnalyzeResponse>>
     );
   }
 
-  // Optional model backend: try morphology + Gram from the trained model.
-  // Falls back silently to the heuristic if the backend is offline.
+  // Optional model backend: Gram stains only (DIBaS). Other stain types skip
+  // the model and stay on the heuristic pipeline.
   let modelPrediction = null;
-  if (body.image && (await isModelReachable())) {
+  const supportPreview = classifySupport(body.metrics);
+  if (
+    supportPreview.stain === "gram" &&
+    body.image &&
+    (await isModelReachable())
+  ) {
     modelPrediction = await predictWithModel(body.image, fileName);
   }
 

@@ -3,7 +3,7 @@
 const STEPS = [
   { id: "validate", label: "Validating image", detail: "Checking format, size & readability" },
   { id: "quality", label: "Checking quality", detail: "Blur, contrast & exposure" },
-  { id: "morphology", label: "Analyzing morphology", detail: "Shape, arrangement & Gram appearance" },
+  { id: "morphology", label: "Analyzing morphology", detail: "Shape, arrangement & stain appearance" },
   { id: "result", label: "Generating result", detail: "Selecting 3D model & info card" },
 ] as const;
 

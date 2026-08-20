@@ -1,4 +1,4 @@
-// Stylized illustration of a supported input (Gram-stained field) used as the
+// Stylized illustration of a supported input (stained bacterial field) used as the
 // "example supported image" on the upload page. Purely decorative, deterministic.
 
 export function MicroscopyExample({ className }: { className?: string }) {
@@ -24,7 +24,7 @@ export function MicroscopyExample({ className }: { className?: string }) {
       viewBox="0 0 200 140"
       className={className}
       role="img"
-      aria-label="Example Gram-stained microscopy field with pink rods"
+      aria-label="Example stained microscopy field with pink rods and purple cocci"
     >
       <defs>
         <radialGradient id="field" cx="50%" cy="45%" r="70%">
